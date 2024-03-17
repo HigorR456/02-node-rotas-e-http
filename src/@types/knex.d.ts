@@ -6,11 +6,12 @@ declare module 'knex/types/tables' {
     users: {
       id: string
       session_id: string
-      title: string
-      amount: number
+      username: string
+      email: string
+      password: string
       created_at: string
       updated_at: string
-    },
+    }
     meals: {
       id: string
       session_id: string
@@ -20,7 +21,7 @@ declare module 'knex/types/tables' {
       diet_meal: boolean
       created_at: string
       updated_at: string
-    },
+    }
     metrics: {
       id: string
       session_id: string
