@@ -29,6 +29,7 @@ declare module 'knex/types/tables' {
       diet_amount: number
       not_diet_amount: number
       diet_sequence: number
+      longest_sequence: number
       created_at: string
       updated_at: string
     }

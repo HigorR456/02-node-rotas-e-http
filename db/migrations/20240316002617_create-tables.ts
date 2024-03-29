@@ -29,6 +29,7 @@ export async function up(knex: Knex): Promise<void> {
     table.integer('diet_amount').notNullable()
     table.integer('not_diet_amount').notNullable()
     table.integer('diet_sequence').notNullable()
+    table.integer('longest_sequence').notNullable()
     table.timestamp('created_at').defaultTo(knex.fn.now()).notNullable()
     table.timestamp('updated_at').defaultTo(knex.fn.now()).notNullable()
   })

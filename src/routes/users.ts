@@ -7,12 +7,12 @@ import { checkSessionIdExists } from '../middlewares/check-session-id-exists'
 export async function usersRoutes(app: FastifyInstance) {
   // Login
   app.post('/login', async (request, reply) => {
-    const createUserBodySchema = z.object({
+    const loginBodySchema = z.object({
       email: z.string(),
       password: z.string(),
     })
 
-    const { email, password } = createUserBodySchema.parse(request.body)
+    const { email, password } = loginBodySchema.parse(request.body)
 
     const user = await knex('users')
       .select('password', 'session_id')
@@ -31,7 +31,7 @@ export async function usersRoutes(app: FastifyInstance) {
     return reply.status(400).send('Incorrect password')
   })
 
-  // Signup
+  // Create User - Signup
   app.post('/signup', async (request, reply) => {
     const createUserBodySchema = z.object({
       username: z.string(),
@@ -61,6 +61,16 @@ export async function usersRoutes(app: FastifyInstance) {
       password,
     })
 
+    await knex('metrics').insert({
+      id: randomUUID(),
+      session_id: sessionId,
+      meal_amount: 0,
+      diet_amount: 0,
+      not_diet_amount: 0,
+      diet_sequence: 0,
+      longest_sequence: 0,
+    })
+
     return reply.status(201).send()
   })
 
@@ -72,7 +82,7 @@ export async function usersRoutes(app: FastifyInstance) {
     },
     async (request, reply) => {
       const { sessionId } = request.cookies
-      const createUserBodySchema = z.object({
+      const updateUserBodySchema = z.object({
         username: z.string().optional(),
         email: z.string().optional(),
         password: z.string(),
@@ -84,7 +94,7 @@ export async function usersRoutes(app: FastifyInstance) {
         email,
         password,
         new_password: newPassword,
-      } = createUserBodySchema.parse(request.body)
+      } = updateUserBodySchema.parse(request.body)
 
       const currentUserData = await knex('users')
         .select('username', 'email', 'password')
@@ -94,15 +104,17 @@ export async function usersRoutes(app: FastifyInstance) {
         username &&
           (await knex('users')
             .where('session_id', sessionId)
-            .update({ username }))
+            .update({ username, updated_at: knex.fn.now() }))
 
         email &&
-          (await knex('users').where('session_id', sessionId).update({ email }))
+          (await knex('users')
+            .where('session_id', sessionId)
+            .update({ email, updated_at: knex.fn.now() }))
 
         newPassword &&
           (await knex('users')
             .where('session_id', sessionId)
-            .update({ password: newPassword }))
+            .update({ password: newPassword, updated_at: knex.fn.now() }))
 
         return reply.status(200).send()
       }
